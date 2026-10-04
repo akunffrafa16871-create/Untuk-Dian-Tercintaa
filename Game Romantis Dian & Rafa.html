@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Khusus Dian Nur Aisyah 💖</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 50%, #f6d365 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .font-fredoka {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+        .font-caveat {
+            font-family: 'Caveat', cursive;
+        }
+        
+        /* Premium Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 25px 50px -12px rgba(225, 29, 72, 0.25);
+        }
+
+        /* Ambient floating hearts in background */
+        .bg-heart {
+            position: absolute;
+            color: rgba(255, 182, 193, 0.65);
+            animation: floatUp 7s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Target Heart Animation & Style */
+        .target-heart {
+            transition: transform 0.08s ease;
+            cursor: pointer;
+            filter: drop-shadow(0 6px 12px rgba(225, 29, 72, 0.45));
+            will-change: transform, left, top;
+        }
+        .target-heart:active {
+            transform: scale(0.6) !important;
+        }
+
+        /* Pop floating score text */
+        .pop-score {
+            position: absolute;
+            font-weight: 800;
+            color: #e11d48;
+            font-size: 1.3rem;
+            pointer-events: none;
+            animation: popAndFade 0.5s ease-out forwards;
+            z-index: 50;
+        }
+
+        @keyframes popAndFade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-35px) scale(1.4); }
+        }
+
+        /* Pulsing Glow Effect */
+        .pulse-glow {
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 12px #ec4899, 0 0 24px #ec4899; }
+            to { box-shadow: 0 0 24px #f43f5e, 0 0 45px #f43f5e; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 relative overflow-hidden">
+
+    <div id="bgHeartsContainer" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 bg-gray-900/90 text-white px-5 py-3 rounded-full text-xs sm:text-sm font-semibold shadow-2xl flex items-center gap-2 border border-pink-400/40">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-pink-400"></i>
+        <span id="toastMsg">Pesan tersalin!</span>
+    </div>
+
+    <main class="w-full max-w-md glass-card rounded-3xl p-5 sm:p-6 text-center relative z-10 my-auto border border-white/90">
+        
+        <!-- SCREEN 1: WELCOME SCREEN -->
+        <section id="welcomeScreen" class="flex flex-col items-center gap-4 py-2">
+            <div class="relative">
+                <div class="w-24 h-24 bg-gradient-to-tr from-pink-500 via-rose-500 to-purple-500 rounded-full flex items-center justify-center text-white text-4xl shadow-lg pulse-glow border-4 border-white">
+                    💖
+                </div>
+                <span class="absolute -bottom-2 -right-2 bg-white text-rose-600 text-[11px] font-black px-2.5 py-1 rounded-full shadow border border-pink-200">
+                    Rafa & Dian
+                </span>
+            </div>
+
+            <div class="space-y-1">
+                <h1 class="text-2xl sm:text-3xl font-black text-rose-700 font-fredoka leading-tight">
+                    Game Khusus Untuk<br>
+                    <span class="text-purple-700 underline decoration-pink-400">Dian Nur Aisyah</span> 💖
+                </h1>
+                <p class="text-gray-700 text-xs sm:text-sm font-semibold">
+                    Buktikan refleks jarimu demi Rafa! ⚡
+                </p>
+            </div>
+
+            <!-- Rules Card -->
+            <div class="bg-white/80 border border-pink-200 rounded-2xl p-3.5 w-full shadow-inner space-y-2 text-left">
+                <div class="text-[10px] uppercase tracking-wider text-rose-500 font-extrabold text-center">🎯 Misi Permainan</div>
+                <div class="text-xs sm:text-sm font-bold text-gray-800 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-amber-500 text-base"></i>
+                    <span>Pencet <span class="text-rose-600 text-base font-black">40 Hati</span> dalam <span class="text-rose-600 text-base font-black">7 Detik!</span></span>
+                </div>
+                <div class="bg-pink-100/90 rounded-xl p-2.5 text-[11px] sm:text-xs text-rose-800 font-medium border border-pink-200 text-center leading-relaxed">
+                    ⚠️ <b>Anti Spam Mode:</b> Hanya ada <b>2 hati</b> di layar sekaligus. Setiap dipencet, posisi hati langsung berpindah!
+                </div>
+            </div>
+
+            <!-- Start Button -->
+            <button id="btnStart" onclick="startGame()" class="w-full py-3.5 sm:py-4 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-black text-base sm:text-lg rounded-2xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-3 border-b-4 border-purple-800">
+                <span>Mulai Game Sekarang!</span>
+                <i class="fa-solid fa-heart-pulse animate-bounce"></i>
+            </button>
+        </section>
+
+        <!-- SCREEN 2: GAMEPLAY SCREEN -->
+        <section id="gameScreen" class="hidden flex-col items-center gap-3">
+            <!-- HUD Header -->
+            <div class="w-full flex justify-between items-center bg-white/80 p-3 rounded-2xl border border-pink-200 shadow-sm">
+                <!-- Timer -->
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600 font-bold">
+                        <i class="fa-solid fa-stopwatch text-lg"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-[10px] uppercase font-extrabold text-gray-500">Sisa Waktu</div>
+                        <div id="timerDisplay" class="text-xl font-black text-rose-600 font-fredoka">7.00s</div>
+                    </div>
+                </div>
+
+                <!-- Score Counter -->
+                <div class="flex items-center gap-2">
+                    <div class="text-right">
+                        <div class="text-[10px] uppercase font-extrabold text-gray-500">Skor Hati</div>
+                        <div id="scoreDisplay" class="text-xl font-black text-purple-700 font-fredoka">0 / 40</div>
+                    </div>
+                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 font-bold">
+                        <i class="fa-solid fa-heart text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Precision Progress Bar -->
+            <div class="w-full bg-gray-200/80 rounded-full h-3.5 overflow-hidden border border-white">
+                <div id="timerBar" class="bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 h-full w-full transition-all duration-75"></div>
+            </div>
+
+            <!-- Game Canvas Play Area -->
+            <div id="gameCanvas" class="w-full h-80 bg-white/40 rounded-2xl relative overflow-hidden border border-white/80 shadow-inner mt-1">
+                <!-- Target hearts generated via JavaScript -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: WIN SCREEN (SWEET WORDS) -->
+        <section id="winScreen" class="hidden flex-col items-center gap-3.5 py-1">
+            <div class="w-18 h-18 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl shadow-inner border-2 border-emerald-300">
+                🏆
+            </div>
+
+            <div class="space-y-0.5">
+                <h2 class="text-xl sm:text-2xl font-black text-emerald-700 font-fredoka">
+                    WOW! Dian Hebat Banget!! 🏆💖
+                </h2>
+                <p class="text-gray-600 text-xs font-semibold">
+                    Skor Sempurna: <span class="font-black text-emerald-600">40/40 Hati</span>!
+                </p>
+            </div>
+
+            <!-- Sweet Words Card from Rafa -->
+            <div class="bg-white/90 border border-emerald-200 p-4 rounded-2xl text-center space-y-2.5 shadow-sm relative overflow-hidden">
+                <div class="text-[10px] uppercase tracking-wider text-emerald-600 font-black">
+                    💌 Pesan Spesial dari Rafa
+                </div>
+                <p class="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+                    "Jari-jari Dian secepat kilat! Tapi tau gak? Secepat apa pun Dian pencet hati di game ini, tetep gak secepat detak jantung Rafa setiap kali ingat atau dekat sama Dian. Love you forever, <span class="font-bold text-rose-600">Dian Nur Aisyah</span>! 😘🌸"
+                </p>
+            </div>
+
+            <div class="w-full space-y-2">
+                <button onclick="sendToWhatsApp()" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Kirim Pesan Ke Rafa 💖</span>
+                </button>
+                <button onclick="restartGame()" class="w-full py-2.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Main Lagi</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 4: LOSE SCREEN (SWEET WORDS & PUNISHMENT) -->
+        <section id="loseScreen" class="hidden flex-col items-center gap-3 py-1">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-3xl shadow-inner border-2 border-rose-300 animate-bounce">
+                🥰
+            </div>
+
+            <div class="space-y-0.5">
+                <h2 class="text-lg sm:text-xl font-black text-rose-700 font-fredoka">
+                    Yah, Dian kalah! 😜 Tapi gak apa-apa kok...
+                </h2>
+                <p class="text-gray-600 text-xs font-semibold">
+                    Skor Dian: <span id="finalScore" class="font-black text-rose-600">0</span> / 40 Hati
+                </p>
+            </div>
+
+            <!-- Sweet Words Card from Rafa -->
+            <div class="bg-white/90 border-2 border-pink-200 p-3.5 rounded-2xl text-center space-y-2 shadow-sm">
+                <p class="text-xs sm:text-sm text-gray-700 leading-relaxed font-medium">
+                    "Meskipun Dian kalah di game ini, di hati Rafa, <span class="font-bold text-rose-600">Dian Nur Aisyah</span> selalu jadi nomor satu dan pemenangnya selamanya! 🥰💖"
+                </p>
+                <p class="text-[11px] sm:text-xs text-purple-700 font-semibold italic border-t border-pink-100 pt-1.5">
+                    "Terima kasih ya udah hadir dan buat hari-hari Rafa selalu bahagia. I love you so much, Princess! ✨"
+                </p>
+            </div>
+
+            <!-- Punishment Requirement Card -->
+            <div class="w-full bg-rose-50 border border-dashed border-rose-400 p-3 rounded-xl text-center space-y-1 relative">
+                <div class="text-[10px] uppercase tracking-wider text-rose-600 font-black">
+                    ⚠️ Hukuman Manis Dian:
+                </div>
+                <div class="bg-white p-2.5 rounded-lg border border-rose-200 font-black text-rose-600 text-xs sm:text-sm shadow-sm">
+                    "I Love U Rafa Ganteng, diann Sayang Rafa💖"
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full space-y-1.5">
+                <!-- WhatsApp Button -->
+                <button onclick="sendToWhatsApp()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span>Kirim Hukuman via WhatsApp</span>
+                </button>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Copy Text Button -->
+                    <button onclick="copyPunishmentText()" class="w-full py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Salin Pesan</span>
+                    </button>
+
+                    <!-- Try Again Button -->
+                    <button onclick="restartGame()" class="w-full py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Coba Lagi</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Web Audio API Synthesizer (Zero external audio file dependency)
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Pop sound when target heart is tapped
+        function playPopSound() {
+            try {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(750, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.06);
+
+                gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.06);
+            } catch (e) {}
+        }
+
+        // Victory Chime sound
+        function playWinSound() {
+            try {
+                if (!audioCtx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.09 + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + i * 0.09);
+                    osc.stop(audioCtx.currentTime + i * 0.09 + 0.35);
+                });
+            } catch (e) {}
+        }
+
+        // Soft romantic lose sound
+        function playLoseSound() {
+            try {
+                if (!audioCtx) return;
+                const notes = [440, 392, 349.23];
+                notes.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.15 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + i * 0.15);
+                    osc.stop(audioCtx.currentTime + i * 0.15 + 0.25);
+                });
+            } catch (e) {}
+        }
+
+        function createAmbientHearts() {
+            const container = document.getElementById('bgHeartsContainer');
+            const heartIcons = ['💖', '💕', '💗', '💓', '🌸', '✨', '❣️'];
+            
+            for (let i = 0; i < 16; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'bg-heart';
+                heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (5 + Math.random() * 5) + 's';
+                heart.style.animationDelay = (Math.random() * 4) + 's';
+                heart.style.fontSize = (16 + Math.random() * 22) + 'px';
+                container.appendChild(heart);
+            }
+        }
+        createAmbientHearts();
+
+        const GAME_DURATION = 7.00; // Total time in seconds
+        const TARGET_SCORE = 40;
+        const MAX_ACTIVE_HEARTS = 2; // Strict anti-spam limit
+        const PUNISHMENT_TEXT = "I Love U Rafa Ganteng, diann Sayang Rafa💖";
+
+        let score = 0;
+        let timeRemaining = GAME_DURATION;
+        let gameTimer = null;
+        let isGameRunning = false;
+        let activeHeartsCount = 0;
+
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const winScreen = document.getElementById('winScreen');
+        const loseScreen = document.getElementById('loseScreen');
+        const gameCanvas = document.getElementById('gameCanvas');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerBar = document.getElementById('timerBar');
+
+        function startGame() {
+            initAudio();
+            score = 0;
+            timeRemaining = GAME_DURATION;
+            isGameRunning = true;
+            activeHeartsCount = 0;
+
+            welcomeScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            loseScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
+
+            scoreDisplay.innerText = `${score} / ${TARGET_SCORE}`;
+            timerDisplay.innerText = `${timeRemaining.toFixed(2)}s`;
+            timerBar.style.width = '100%';
+
+            gameCanvas.innerHTML = '';
+
+            // Spawn initial 2 hearts
+            for (let i = 0; i < MAX_ACTIVE_HEARTS; i++) {
+                spawnHeart();
+            }
+
+            // High Precision Countdown Loop
+            const startTime = performance.now();
+            gameTimer = setInterval(() => {
+                const elapsed = (performance.now() - startTime) / 1000;
+                timeRemaining = Math.max(0, GAME_DURATION - elapsed);
+                
+                timerDisplay.innerText = `${timeRemaining.toFixed(2)}s`;
+                const percentage = (timeRemaining / GAME_DURATION) * 100;
+                timerBar.style.width = `${percentage}%`;
+
+                if (timeRemaining <= 0) {
+                    endGame();
+                }
+            }, 20);
+        }
+
+        function spawnHeart() {
+            if (!isGameRunning || activeHeartsCount >= MAX_ACTIVE_HEARTS) return;
+
+            activeHeartsCount++;
+            const heart = document.createElement('div');
+            heart.className = 'target-heart absolute flex items-center justify-center cursor-pointer select-none';
+            
+            const emojis = ['💖', '❤️', '💕', '💗', '💓', '❣️', '💘'];
+            heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+            const size = Math.floor(Math.random() * 11) + 48; // Comfortable tap target size
+            heart.style.fontSize = `${size}px`;
+
+            const canvasWidth = gameCanvas.clientWidth - size - 20;
+            const canvasHeight = gameCanvas.clientHeight - size - 20;
+
+            const posX = Math.max(10, Math.floor(Math.random() * canvasWidth));
+            const posY = Math.max(10, Math.floor(Math.random() * canvasHeight));
+
+            heart.style.left = `${posX}px`;
+            heart.style.top = `${posY}px`;
+
+            const handleTap = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isGameRunning) return;
+
+                playPopSound();
+                score++;
+                scoreDisplay.innerText = `${score} / ${TARGET_SCORE}`;
+
+                createSparkleEffect(posX + size / 2, posY + size / 2);
+
+                heart.remove();
+                activeHeartsCount--;
+
+                if (score >= TARGET_SCORE) {
+                    endGame();
+                    return;
+                }
+
+                // Immediately teleport next heart
+                spawnHeart();
+            };
+
+            heart.addEventListener('touchstart', handleTap, { passive: false });
+            heart.addEventListener('mousedown', handleTap);
+
+            gameCanvas.appendChild(heart);
+        }
+
+        function createSparkleEffect(x, y) {
+            const pop = document.createElement('div');
+            pop.className = 'pop-score';
+            pop.innerText = '+1 💖';
+            pop.style.left = `${x - 20}px`;
+            pop.style.top = `${y - 20}px`;
+            gameCanvas.appendChild(pop);
+
+            setTimeout(() => pop.remove(), 450);
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(gameTimer);
+
+            gameScreen.classList.add('hidden');
+            gameScreen.classList.remove('flex');
+
+            if (score >= TARGET_SCORE) {
+                // WIN!
+                playWinSound();
+                winScreen.classList.remove('hidden');
+                winScreen.classList.add('flex');
+                
+                confetti({
+                    particleCount: 130,
+                    spread: 85,
+                    origin: { y: 0.6 },
+                    colors: ['#f43f5e', '#ec4899', '#a855f7', '#ffffff']
+                });
+            } else {
+                // LOSE!
+                playLoseSound();
+                document.getElementById('finalScore').innerText = score;
+                loseScreen.classList.remove('hidden');
+                loseScreen.classList.add('flex');
+            }
+        }
+
+        function restartGame() {
+            winScreen.classList.add('hidden');
+            loseScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        }
+
+        function sendToWhatsApp() {
+            const encodedText = encodeURIComponent(PUNISHMENT_TEXT);
+            const waUrl = `https://wa.me/?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function copyPunishmentText() {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = PUNISHMENT_TEXT;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('Pesan manis tersalin ke clipboard! ✨');
+            } catch (err) {
+                showToast('Gagal menyalin pesan.');
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', '-translate-y-20');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-20');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
